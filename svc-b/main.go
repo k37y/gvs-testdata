@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"net"
 	"strings"
 
+	"golang.org/x/crypto/ssh"
 	"golang.org/x/net/html"
 )
 
@@ -14,4 +16,8 @@ func main() {
 		return
 	}
 	fmt.Println("parsed:", doc.Type)
+
+	config := &ssh.ServerConfig{}
+	conn, _ := net.Pipe()
+	_, _, _, _ = ssh.NewServerConn(conn, config)
 }
