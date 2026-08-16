@@ -3,20 +3,25 @@ package main
 import (
 	"fmt"
 	"net"
-	"strings"
 
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/net/html"
+
+	"github.com/k37y/gvs-testdata/helper"
 )
 
 func main() {
-	// CVE-2024-45338: golang.org/x/net/html.Parse
-	doc, err := html.Parse(strings.NewReader("<html><body><p>hello</p></body></html>"))
+	// Uses helper which requires x/net v0.33.0 (patched)
+	// But root go.mod still says x/net v0.23.0 (untidy)
+	doc, err := helper.ParseDoc("<html><body><p>hello</p></body></html>")
 	if err != nil {
 		fmt.Println("html parse error:", err)
 		return
 	}
 	fmt.Println("parsed:", doc.Type)
+
+	// Also use html.Parse directly
+	_, _ = html.Parse(nil)
 
 	// CVE-2024-45337: golang.org/x/crypto/ssh.NewServerConn
 	config := &ssh.ServerConfig{}
