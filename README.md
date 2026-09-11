@@ -1,16 +1,16 @@
-# gvs-testdata
+# multi-module
 
-Test fixtures for [gvs](https://github.com/k37y/gvs) integration tests.
+Two independent Go modules in one repo:
+- `svc-a/`: `golang.org/x/net@v0.23.0`, `golang.org/x/crypto@v0.23.0` (both vulnerable)
+- `svc-b/`: `golang.org/x/net@v0.33.0`, `golang.org/x/crypto@v0.31.0` (both patched)
 
-Each branch contains a minimal Go module designed to trigger a specific vulnerability scenario.
+Each is `package main`, calling `html.Parse` and `ssh.NewServerConn`.
 
-## Branches
+Used for two CVEs: CVE-2024-45338 (GO-2024-3333, `golang.org/x/net/html`) and
+CVE-2024-45337 (GO-2024-3321, `golang.org/x/crypto/ssh`).
 
-| Branch | CVE | Type | Ranges | Expected |
-|--------|-----|------|--------|----------|
-| `vuln-single-range` | CVE-2024-45338 (GO-2024-3333) | non-stdlib (`golang.org/x/net/html`) | 0→0.33.0 | vulnerable |
-| `patched-single-range` | CVE-2024-45338 (GO-2024-3333) | non-stdlib (`golang.org/x/net/html`) | 0→0.33.0 | not vulnerable |
-| `vuln-stdlib-multi-range` | CVE-2023-45288 (GO-2024-2687) | stdlib (`net/http`) | 0→1.21.9, 1.22.0-0→1.22.2 | vulnerable |
-| `patched-stdlib-multi-range` | CVE-2023-45288 (GO-2024-2687) | stdlib (`net/http`) | 0→1.21.9, 1.22.0-0→1.22.2 | not vulnerable |
-| `vuln-replace-directive` | CVE-2024-45338 (GO-2024-3333) | non-stdlib (`golang.org/x/net/html`) | 0→0.33.0 | vulnerable (replace) |
-| `not-a-go-repo` | — | — | — | error |
+Validates per-module job dispatch/deduplication across multiple `go.mod` modules in a
+single repo, aggregated as vulnerable if any module is vulnerable.
+
+Expected: `IsVulnerable=true` overall (driven by `svc-a`) for both CVEs; `svc-b` reports
+its patched versions individually in `UsedImports`.
