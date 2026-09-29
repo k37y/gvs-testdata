@@ -3,7 +3,7 @@
 Test fixtures for [gvs](https://github.com/k37y/gvs) integration tests.
 
 Each branch contains a minimal Go module designed to trigger a specific vulnerability scenario.
-All non-stdlib branches import both `golang.org/x/net/html` and `golang.org/x/crypto/ssh` to enable testing multiple CVEs per branch.
+The original x/net and x/crypto branches import both `golang.org/x/net/html` and `golang.org/x/crypto/ssh` to enable testing multiple CVEs per branch.
 
 ## Branches
 
@@ -53,3 +53,26 @@ The tests in `gvs/internal/api/integration_test.go` exercise these branches thro
 the HTTP API and all four call-graph algorithms, including response fields,
 reflection evidence, and downloadable SVG graphs. Private temporary repositories
 are used only for lifecycle checks such as cancellation and clone failures.
+
+## Additional scanner regressions
+
+| Branch | Expected result | Purpose |
+|--------|-----------------|---------|
+| `init-call` | true | Vulnerable call during package initialization |
+| `goroutine-call` | true | Vulnerable call inside a goroutine |
+| `deferred-call` | true | Deferred vulnerable function |
+| `generic-call` | true | Vulnerable call inside an instantiated generic function |
+| `reflection-helper` | true for RTA; false for VTA/CHA/static | Reflection in a helper package; all algorithms report evidence |
+| `broken-package` | unknown | Valid main package alongside a package with a type error |
+| `missing-dependency` | unknown | Missing local dependency prevents complete analysis |
+| `selected-dependency-version` | false | Declared v1.0.0 is upgraded to patched v1.1.0 by Go |
+| `prerelease-version` | true | v1.1.0-rc.1 is before the v1.1.0 fix |
+| `pseudo-version` | true | Pseudo-version is before the v1.1.0 fix |
+| `multi-symbol-paths` | true | Scan `Other,Danger`; each SVG must follow the correct call edge |
+| `replacement-downgrade` | true | Scan x/net/html Parse; require v0.33.0 but replace with v0.24.0 |
+| `fork-replacement` | unknown | Scan jwt-go Parse; replacement fork has a separate version history |
+
+The last two fixtures use downloaded Go modules. Other new branches use the
+checked-in synthetic dependency. `broken-package` and `missing-dependency` are
+intentionally not buildable. The integration harness builds the scanner with
+`-race` and varies its worker count across multiple modules and affected packages.
