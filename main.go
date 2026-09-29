@@ -1,5 +1,5 @@
 package main
-
 import "example.com/vulnerable"
-
-func main() { println(vulnerable.Danger()) }
+func alpha() { println(vulnerable.Danger()) }
+func beta() { println(vulnerable.Other()) }
+func main() { alpha(); beta() }
