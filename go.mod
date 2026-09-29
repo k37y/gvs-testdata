@@ -1,6 +1,12 @@
-module example.com/app
+module github.com/k37y/gvs-testdata
 
 go 1.22.0
 
-require example.com/vulnerable v1.0.0
-replace example.com/vulnerable => ./dep
+require (
+	golang.org/x/crypto v0.23.0
+	golang.org/x/net v0.33.0
+)
+
+require golang.org/x/sys v0.20.0 // indirect
+
+replace golang.org/x/net => golang.org/x/net v0.24.0
