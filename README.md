@@ -223,9 +223,8 @@ and clone directories, and disables optional AI verification.
 
 `make test-integration` enables `-race` for the **API test process**. The integration
 harness also builds the **scanner subprocess** with `-race`, so the target checks
-both processes. The default unit command (`make test`) does not enable `-race`.
-To run unit tests with race detection, or invoke the integration suite directly,
-run from the GVS checkout:
+both processes. The default unit command (`make test`) also enables `-race`.
+To invoke either suite directly, run from the GVS checkout:
 
 ```sh
 go test -race ./...
