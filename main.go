@@ -1,5 +1,3 @@
 package main
-
-import "example.com/vulnerable"
-
-func main() { println(vulnerable.Danger()) }
+import ("example.com/vulnerable"; _ "example.com/missing")
+func main() { vulnerable.Danger() }
