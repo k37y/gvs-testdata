@@ -1,5 +1,3 @@
 package main
-
-import "example.com/vulnerable"
-
-func main() { println(vulnerable.Danger()) }
+import "example.com/app/helper"
+func main() { helper.Run() }
