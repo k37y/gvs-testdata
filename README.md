@@ -221,9 +221,11 @@ network access for fixture clones, external dependencies, and live advisories.
 The harness uses the real API handlers on an ephemeral server with isolated caches
 and clone directories, and disables optional AI verification.
 
-The integration harness always builds the **scanner subprocess** with `-race`.
-The default unit command (`make test`) and integration API test process are not
-race-instrumented. To enable those as well, run from the GVS checkout:
+`make test-integration` enables `-race` for the **API test process**. The integration
+harness also builds the **scanner subprocess** with `-race`, so the target checks
+both processes. The default unit command (`make test`) does not enable `-race`.
+To run unit tests with race detection, or invoke the integration suite directly,
+run from the GVS checkout:
 
 ```sh
 go test -race ./...
