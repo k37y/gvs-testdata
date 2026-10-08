@@ -1,8 +1,8 @@
-# package-identity-go-bundled
+# package-identity-external
 
-Calls `net.LookupCNAME`, which uses Go's bundled DNS parser. The declared
-`golang.org/x/net` dependency is replaced with a local synthetic module but
-is never imported by the application.
+Calls both `net.LookupCNAME` and `Parser.Answer` from an imported
+`golang.org/x/net/dns/dnsmessage` package. The external package comes from a
+checked-in synthetic module selected through a local replacement.
 
 Run from this branch with a built GVS `cg` binary:
 
@@ -15,14 +15,16 @@ done
 
 Expected for all four algorithms:
 
-- `IsVulnerable`: `"false"`.
-- `UsedImports`: empty/null; the external DNS package is not loaded.
-- No graph paths or scan errors.
-- No external module version or upgrade suggestion for Go's bundled parser.
+- `IsVulnerable`: `"true"` for the supplied manual target and version.
+- `UsedImports["."]["golang.org/x/net/dns/dnsmessage"]` contains
+  `Parser.Answer`, `CurrentVersion: "v0.26.0"`, and fix commands.
+- Graphs refer to the external parser, without Go's distinct
+  `vendor/golang.org/x/net/dns/dnsmessage` target.
+- No scan errors.
 
-The synthetic dependency has no vulnerability. Its name and version are test
-inputs for package identity matching. This manual scan does not assess `net`
-or establish that the application's Go toolchain is free of vulnerabilities.
+The synthetic parser method is empty and has no vulnerability. The package
+name and version threshold are test inputs, not an advisory assessment.
+This fixture needs no external Go dependency downloads.
 
-The companion `package-identity-external` branch imports and calls the local
-parser as well, and must retain its external-module finding.
+The companion `package-identity-go-bundled` branch calls only `net` and must
+not produce an external-parser finding.
