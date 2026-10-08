@@ -1,7 +1,7 @@
 # gvs-testdata
 
 Scenario fixtures for [GVS](https://github.com/k37y/gvs), a Go vulnerability scanner.
-This is the catalog of all **45 scenario branches**. `main` holds this catalog;
+This is the catalog of all **47 scenario branches**. `main` holds this catalog;
 `expand-fixture-coverage` is a documentation branch, not a scanner fixture.
 
 Expected results describe the expanded GVS scanner test suite. Older scanner
@@ -72,6 +72,31 @@ cg -algo rta -library github.com/dgrijalva/jwt-go -symbols Parse -fixversion v3.
 
 `vuln-build-constraint` uses `//go:build windows`; its documented unknown result
 assumes that file is excluded. The Windows variant is not part of this expectation.
+
+## DNS parser package identity
+
+These two branches use a local synthetic `golang.org/x/net` replacement.
+They distinguish Go's bundled parser from the external package with the same
+path suffix. The synthetic parser has no real vulnerability; the version and
+symbol below are manual test inputs. All four algorithms have the same expected
+result for these fixtures.
+
+| Branch | Expected result | Scenario |
+| --- | --- | --- |
+| [`package-identity-go-bundled`](https://github.com/k37y/gvs-testdata/tree/package-identity-go-bundled) | `false` | Calls only `net.LookupCNAME`. The external package is not imported, so UsedImports and graph paths are empty. |
+| [`package-identity-external`](https://github.com/k37y/gvs-testdata/tree/package-identity-external) | `true` | Also calls the external Parser.Answer. Reports v0.26.0 and fix commands, with no bundled-parser target in the graphs. |
+
+Run either branch with:
+
+```sh
+for algo in rta vta cha static; do
+  cg -algo "$algo" -library golang.org/x/net/dns/dnsmessage \
+    -symbols Parser.Answer -fixversion v0.56.0 .
+done
+```
+
+These manual scans target only the external package; they do not assess the
+standard-library `net` advisory targets or establish toolchain safety.
 
 ## Synthetic reachability and scan-logic scenarios
 
